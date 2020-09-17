@@ -1,1 +1,98 @@
+from pyvi import ViTokenizer, ViPosTagger
+import numpy as np
+from tqdm import tqdm
+import gensim 
+import os
+import json
 
+from string import punctuation
+stop_word = []
+with open(r"C:\Users\ADMIN\Documents\vietnamese_stopwords.txt",encoding="utf-8") as f :
+    text = f.read()
+    for word in text.split() :
+        stop_word.append(word)
+    f.close()
+punc = list(punctuation)
+stop_word = stop_word + punc
+
+label = ['an ninh', 'an ninh trat tu', 'bat dong san', 'bien dao',
+       'buu chinh vien thong', 'chinh sach', 'chinh tri', 'cong nghiep',
+       'dan toc', 'dau thau', 'do thi', 'doi ngoai', 'du lich',
+       'giai tri', 'giao duc', 'giao thong van tai', 'hai quan',
+       'khoa hoc cong nghe', 'kiem toan', 'kinh doanh', 'kinh te',
+       'lao dong', 'lao dong thuong binh va xa hoi', 'nang luong',
+       'nong nghiep', 'phap luat', 'phu nu', 'quoc hoi', 'quoc phong',
+       'so huu tri tue', 'suc khoe', 'tai chinh', 'tai nguyen moi truong',
+       'thanh nien', 'thanh tra', 'the thao', 'thoi trang',
+       'thong tin va truyen thong', 'thuong mai', 'tre em', 'van hoa',
+       'van nghe', 'xa hoi', 'xay dung', 'y te']
+tmp=[]
+
+for i in ([18, 33, 34, 7, 28, 3, 5, 27, 20, 31, 4, 36, 40, 43, 12, 35, 16, 25, 42, 14, 13, 30, 19, 2, 15, 44, 6, 32, 26, 17, 38, 41, 10]):
+    tmp.append(label[i])
+print(tmp)
+
+ls = ['kiem toan', 'thanh nien', 'thanh tra', 'cong nghiep', 'quoc phong', 'bien dao', 
+      'chinh sach', 'quoc hoi', 'kinh te', 'tai chinh', 'buu chinh vien thong',
+      'thoi trang', 'van hoa', 'xay dung', 'du lich', 'the thao', 'hai quan', 'phap luat', 
+      'xa hoi', 'giao duc', 'giai tri', 'suc khoe', 'kinh doanh', 'bat dong san',
+      'giao thong van tai', 'y te', 'chinh tri', 'tai nguyen moi truong', 'phu nu',
+      'khoa hoc cong nghe', 'thuong mai', 'van nghe', 'do thi']
+     
+X=[]
+y=[]
+
+folder_path = r"C:\Users\ADMIN\Desktop\json1\json1"
+def get_label(s):   
+    s = s.replace('.json','')
+    
+    for i in range(10):
+        s = s.replace(str(i),'')
+    
+    s = s.split('_')
+    s = ' '.join(s)
+    s = s.replace('  ','')
+    if s[len(s)-1] == ' ':
+        s = s[:len(s)-1]
+    return s
+
+X=[]
+y=[]
+
+folder_path = r"C:\Users\ADMIN\Desktop\json1\json1"
+def get_label(s):   
+    s = s.replace('.json','')
+    
+    for i in range(10):
+        s = s.replace(str(i),'')
+    
+    s = s.split('_')
+    s = ' '.join(s)
+    s = s.replace('  ','')
+    if s[len(s)-1] == ' ':
+        s = s[:len(s)-1]
+    return s
+
+dirs = os.listdir(folder_path)
+for path in (dirs):
+    with open (os.path.join(folder_path, path), encoding = "utf8",) as f:
+        data = json.load(f)
+        print(path)
+        for i in data["response"]["docs"]:
+            k = i["message"]
+            if k!= '':
+                k = get_label(path)
+                if k in ls:
+                    k = i["message"]
+                    k = gensim.utils.simple_preprocess(k)
+                    tmp = []
+ 
+                    for i in k:
+                        if i not in stop_word:
+                            tmp.append(i)
+                    k = tmp 
+                    k = ' '.join(k)
+                    k = ViTokenizer.tokenize(k)
+                    X.append(k)
+                    k = get_label(path)
+                    y.append(k)
